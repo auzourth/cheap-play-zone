@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">Speed Gaming</h3>
+            <h3 className="text-xl font-bold mb-4">CheapPlayZone</h3>
             <p className="text-gray-400">
               Pre-purchased Video Games Delivered Via Accounts
             </p>
@@ -67,7 +67,8 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
           <p>
-            &copy; {new Date().getFullYear()} Speed Gaming. All rights reserved.
+            &copy; {new Date().getFullYear()} CheapPlayZone. All rights
+            reserved.
           </p>
         </div>
       </div>

@@ -3,10 +3,8 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import InputField from '@/components/ui/InputField';
-import { parseStepData } from '../../../../lib/helper';
 
 // Notification component
 const Notification = ({
@@ -52,15 +50,7 @@ export default function Redeem() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [order, setOrder] = useState<{
-    id: string;
-    code: string;
-    email?: string;
-    status: string;
-    isRedeemed: boolean;
-    processing: string;
-    completed: string;
-  }>();
+  const [orderId, setOrderId] = useState('');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -90,8 +80,8 @@ export default function Redeem() {
         .eq('code', code)
         .single();
       if (ordersData) {
-        setOrder(ordersData);
-        setEmail(ordersData.email || '');
+        setOrderId(ordersData.id);
+        setEmail(ordersData.email);
       }
     };
     fetchOrder();
@@ -144,15 +134,10 @@ export default function Redeem() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!code) {
-      setError('Redeem code is required');
+    if (!orderId || !email || !code) {
+      setError('All fields are required');
       return;
     }
-
-    // if (!acceptTerms) {
-    //   setError('Please accept the terms to continue');
-    //   return;
-    // }
 
     setLoading(true);
     setError('');
@@ -191,16 +176,7 @@ export default function Redeem() {
           email,
           updated_at: new Date().toISOString(),
           isRedeemed: true, // Mark the code as redeemed
-          status: 'processing', // Update status to pending
-          processing: JSON.stringify({
-            ...parseStepData(order?.processing || '{}'),
-            status: 'completed',
-            timestamp: new Date().toISOString(),
-          }),
-          completed: JSON.stringify({
-            ...parseStepData(order?.completed || '{}'),
-            status: 'processing',
-          }),
+          status: 'pending', // Update status to pending
         })
         .eq('code', code);
 
@@ -245,35 +221,8 @@ export default function Redeem() {
 
       <div className="max-w-md mx-auto bg-gray-900 p-8 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold mb-6 text-center">
-          Redeem Your Game
+          REDEEM YOUR CODE:
         </h1>
-
-        {/* Already Redeemed Warning */}
-        {order && order.isRedeemed && (
-          <div className="bg-orange-900/50 border border-orange-500 text-white p-4 rounded mb-6">
-            <div className="flex items-start">
-              <AlertTriangle className="w-5 h-5 text-orange-400 mt-0.5 mr-3 flex-shrink-0" />
-              <div>
-                <h3 className="font-medium mb-2">Code Already Redeemed</h3>
-                <p className="text-sm text-orange-200">
-                  This redemption code has already been used. If you need to
-                  track your order status, please visit the{' '}
-                  <Link
-                    href="/track-order"
-                    className="text-orange-300 underline hover:text-orange-200"
-                  >
-                    track order page
-                  </Link>
-                  .
-                </p>
-                <p className="text-sm text-orange-200 mt-2">
-                  If you believe this is an error, please contact our support
-                  team.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {error && (
           <div className="bg-red-900/50 border border-red-500 text-white p-3 rounded mb-4">
@@ -288,69 +237,52 @@ export default function Redeem() {
         )}
 
         <form onSubmit={handleSubmit}>
-          <InputField
-            label="YOUR EMAIL (OPTIONAL)"
-            value={email}
-            onChange={setEmail}
-            placeholder="email@example.com"
-            type="email"
-            className="mb-6"
-          />
+          {/* <div className="mb-4">
+            <label className="block text-gray-400 mb-2">YOUR ORDER ID</label>
+            <input
+              type="text"
+              value={orderId}
+              onChange={(e) => setOrderId(e.target.value)}
+              placeholder="Enter your order ID..."
+              className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
+            />
+          </div> */}
 
-          <InputField
-            label="YOUR REDEEM CODE"
-            value={code}
-            onChange={(newCode) => {
-              setCode(newCode);
-              if (newCode.length > 8) {
-                checkCodeExists(newCode);
-              }
-            }}
-            placeholder="Enter your redeem code..."
-            className="mb-6"
-            required
-          />
-
-          {/* Warning Card */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <div className="flex items-start">
-              <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
-              <div className="text-yellow-800">
-                <h3 className="font-medium text-sm mb-2">
-                  Please Read Before Ordering
-                </h3>
-                <div className="text-xs space-y-2">
-                  <p>
-                    - The product you are purchasing is an{' '}
-                    <strong>account</strong>. As mentioned in the product
-                    description, delivery may take up to 24 hours
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="mb-4">
+            <label className="block text-gray-400 mb-2">YOUR EMAIL</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="email@example.com"
+              className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
+            />
           </div>
 
-          {/* Checkbox */}
-          {/* <div className="flex items-center mb-6">
+          <div className="mb-6">
+            <label className="block text-gray-400 mb-2">YOUR REDEEM CODE</label>
             <input
-              type="checkbox"
-              id="acceptTerms"
-              checked={acceptTerms}
-              onChange={(e) => setAcceptTerms(e.target.checked)}
-              className="w-4 h-4 text-white bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+              type="text"
+              value={code}
+              onChange={(e) => {
+                const newCode = e.target.value;
+                setCode(newCode);
+                if (newCode.length > 8) {
+                  checkCodeExists(newCode);
+                }
+              }}
+              placeholder="Enter your redeem code..."
+              className="w-full bg-gray-800 border border-gray-700 rounded p-3 text-white"
             />
-            <label htmlFor="acceptTerms" className="ml-2 text-sm text-gray-300">
-              I accept, I want to order
-            </label>
-          </div> */}
+          </div>
 
           <button
             type="submit"
-            disabled={loading || !codeExists || order?.isRedeemed}
-            className={`w-full bg-amber-500 font-bold py-3 px-4 rounded-lg transition-colors ${
-              loading || !codeExists || order?.isRedeemed
+            disabled={loading || !codeExists}
+            className={`w-full bg-white text-black font-bold py-3 px-4 rounded-full transition-colors ${
+              loading || !codeExists
                 ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-amber-600'
+                : 'hover:bg-gray-200'
             }`}
           >
             {loading ? 'Processing...' : 'Redeem'}

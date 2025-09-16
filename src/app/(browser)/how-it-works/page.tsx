@@ -1,40 +1,30 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
-import openCase from '@/assetes/open-case.jpeg';
+import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
+import image from '@/assetes/image.png';
+import image2 from '@/assetes/image2.png';
+import image3 from '@/assetes/image3.png';
+import image4 from '@/assetes/image4.png';
+import image5 from '@/assetes/image5.png';
+import image6 from '@/assetes/image6.png';
+import image7 from '@/assetes/image7.png';
+import image8 from '@/assetes/image8.png';
+import image9 from '@/assetes/image9.png';
+import image10 from '@/assetes/image10.png';
+import image11 from '@/assetes/image11.png';
+import image12 from '@/assetes/image12.png';
+import image13 from '@/assetes/image13.png';
+import image14 from '@/assetes/image14.png';
+import image15 from '@/assetes/image15.png';
+import image16 from '@/assetes/image16.png';
 
 const Page: React.FC = () => {
   return (
     <div className="bg-black text-white min-h-screen">
       {/* Header */}
-      <div className="container max-w-xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold">HOW TO OPEN A CASE</h1>
-
-        <div className="mt-3 pt-3 border-t border-gray-700">
-          <p className="text-gray-300 text-lg">
-            To open a case in Kinguin, please follow these steps:
-          </p>
-          <ol className="list-decimal list-inside mt-2 space-y-1 text-gray-300">
-            <li>Log into your Kinguin account</li>
-            <li>Navigate to your order history</li>
-            <li>
-              Find the relevant order and click &quot;Report Problem&quot;
-            </li>
-            <li>Select the appropriate issue category</li>
-            <li>Provide detailed information about your problem</li>
-            <li>Submit the case and wait for support response</li>
-          </ol>
-          <Image
-            src={openCase}
-            alt="Kinguin Case Opening"
-            width={400}
-            height={600}
-            className="mt-4 rounded-lg"
-          />
-        </div>
-      </div>
-      {/* <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <Link
           href="/"
           className="flex items-center text-gray-400 hover:text-white mb-8 transition-colors"
@@ -44,9 +34,9 @@ const Page: React.FC = () => {
         </Link>
 
         <h1 className="text-4xl font-bold mb-8 text-center">How It Works</h1>
- */}
-      {/* Important Information */}
-      {/* <div className="bg-yellow-50 text-amber-800 p-6 rounded-lg mb-8">
+
+        {/* Important Information */}
+        <div className="bg-yellow-50 text-amber-800 p-6 rounded-lg mb-8">
           <h2 className="text-2xl font-bold mb-4">IMPORTANT</h2>
           <ul className="list-disc pl-6 space-y-3">
             <li>
@@ -93,10 +83,10 @@ const Page: React.FC = () => {
               lost, we only offer warranty for the game.
             </li>
           </ul>
-        </div> */}
+        </div>
 
-      {/* PS Plus Information */}
-      {/* <div className="bg-yellow-50 text-amber-800 p-6 rounded-lg mb-8">
+        {/* PS Plus Information */}
+        <div className="bg-yellow-50 text-amber-800 p-6 rounded-lg mb-8">
           <h2 className="text-2xl font-bold mb-4">IMPORTANT - PS Plus</h2>
           <ul className="list-disc pl-6 space-y-3">
             <li>
@@ -112,10 +102,10 @@ const Page: React.FC = () => {
               the games included in PS Plus.
             </li>
           </ul>
-        </div> */}
+        </div>
 
-      {/* How to Install */}
-      {/* <div className="bg-yellow-50 text-amber-800 p-6 rounded-lg mb-8">
+        {/* How to Install */}
+        <div className="bg-yellow-50 text-amber-800 p-6 rounded-lg mb-8">
           <h2 className="text-2xl font-bold mb-4">
             How to Install Monthly Games:
           </h2>
@@ -139,10 +129,10 @@ const Page: React.FC = () => {
               </span>
             </li>
           </ul>
-        </div> */}
+        </div>
 
-      {/* guide Tutorial */}
-      {/* <div className="mt-8">
+        {/* guide Tutorial */}
+        <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">
             PS5 Tutorial - Step-by-step guide
           </h2>
@@ -238,20 +228,18 @@ const Page: React.FC = () => {
                 <p className="text-gray-400">{step.description}</p>
               )}
               {step.imgae && (
-                <Image
+                <img
                   src={step.imgae.src}
                   alt={step.title}
                   className="w-full h-auto mb-2"
-                  width={800}
-                  height={450}
                 />
               )}
             </div>
           ))}
-        </div> */}
+        </div>
 
-      {/* troubleshooting */}
-      {/* <div>
+        {/* troubleshooting */}
+        <div>
           <h2 className="text-2xl font-bold mb-4">Troubleshooting</h2>
           {[
             {
@@ -315,11 +303,9 @@ const Page: React.FC = () => {
                 {step.title}
               </h3>
               {step.imgae && (
-                <Image
+                <img
                   src={step.imgae.src}
                   alt={'Step ' + (index + 1)}
-                  width={800}
-                  height={450}
                   className="w-full h-auto mb-2"
                 />
               )}
@@ -375,7 +361,7 @@ const Page: React.FC = () => {
             </li>
           </ul>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };

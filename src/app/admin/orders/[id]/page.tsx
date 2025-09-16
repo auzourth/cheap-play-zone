@@ -84,18 +84,31 @@ export default function EditOrder() {
         .from('cheap-play-zone')
         .update({
           loginInfo: loginInfo, // Enable loginInfo update
-          status: 'completed',
+          status: 'processing',
           updated_at: new Date().toISOString(),
-          completed: JSON.stringify({
-            label: 'completed',
-            status: 'completed',
-            timestamp: new Date().toISOString(),
-          }),
         })
         .eq('id', order.id);
 
       if (updateError) {
         throw updateError;
+      }
+
+      // Send email to user with loginInfo if email exists
+      if (order.email) {
+        try {
+          await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: order.email,
+              subject: 'Your Game Login Information',
+              text: loginInfo,
+            }),
+          });
+        } catch (emailErr) {
+          // Optionally log or show error, but don't block order completion
+          console.error('Failed to send email:', emailErr);
+        }
       }
 
       // Also update in local state for backwards compatibility

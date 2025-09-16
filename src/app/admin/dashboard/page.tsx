@@ -401,6 +401,7 @@ const AdminDashboardPage: React.FC = () => {
       <CodeGeneratorModal
         isOpen={isCodeModalOpen}
         onClose={() => setIsCodeModalOpen(false)}
+        onSave={() => setRefreshTrigger((prev) => prev + 1)}
       />
 
       <div className="overflow-x-auto bg-gray-800 rounded-lg shadow mb-6">

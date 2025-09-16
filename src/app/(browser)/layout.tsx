@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
 import Header from '@/components/common/Header';
+import Footer from '@/components/common/Footer';
 import { AppProvider } from '@/context/AppContext';
 
 const geistSans = Geist({
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Speed Gaming',
+  title: 'CheapPlayZone',
   description: 'Your trusted source for game keys and digital products',
 };
 
@@ -32,7 +33,7 @@ export default function RootLayout({
         <AppProvider>
           <Header />
           <div className="flex-grow">{children}</div>
-          {/* <Footer /> */}
+          <Footer />
         </AppProvider>
       </body>
     </html>
