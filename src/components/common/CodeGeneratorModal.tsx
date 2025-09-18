@@ -63,7 +63,10 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
           onSave(generatedCode);
         }
       } catch (err) {
-        alert('An error occurred while saving the order.');
+        alert(
+          'An error occurred while saving the order.' +
+            (err instanceof Error ? err.message : 'Unknown error')
+        );
         return;
       }
     }

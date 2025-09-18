@@ -96,7 +96,7 @@ export default function Redeem() {
     }
 
     // From query params (fallback)
-    const codeParam = searchParams.get('code');
+    const codeParam = searchParams?.get('code');
     if (codeParam && !params?.id) {
       setCode(codeParam);
       checkCodeExists(codeParam);

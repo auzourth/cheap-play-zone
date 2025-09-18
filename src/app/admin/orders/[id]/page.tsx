@@ -11,7 +11,9 @@ import { Order } from '../../../../types';
 export default function EditOrder() {
   const params = useParams();
   const router = useRouter();
-  const { id } = params;
+  const idParam = params && 'id' in params ? params.id : undefined;
+  const id = Array.isArray(idParam) ? idParam[0] : idParam;
+
   const { updateOrderStatus } = useAppContext();
 
   const [loginInfo, setLoginInfo] = useState('');

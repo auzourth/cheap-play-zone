@@ -24,6 +24,7 @@ const AdminDashboardPage: React.FC = () => {
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -42,7 +43,15 @@ const AdminDashboardPage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
-  // Load orders from Supabase
+  // Debounce searchTerm
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 1000);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Load orders from Supabase, with debounced search
   useEffect(() => {
     const checkSessionAndLoadData = async () => {
       setIsLoading(true);
@@ -59,21 +68,7 @@ const AdminDashboardPage: React.FC = () => {
         return;
       }
 
-      // Get total count
-      let countQuery = supabase
-        .from('cheap-play-zone')
-        .select('*', { count: 'exact', head: true });
-      if (statusFilter) {
-        countQuery = countQuery.eq('status', statusFilter);
-      }
-      const { count, error: countError } = await countQuery;
-      if (!countError && typeof count === 'number') {
-        setTotalRows(count);
-      } else {
-        setTotalRows(0);
-      }
-
-      // Build query for orders (paged)
+      // Build query for orders (paged & filtered)
       let query = supabase
         .from('cheap-play-zone')
         .select('*')
@@ -85,10 +80,18 @@ const AdminDashboardPage: React.FC = () => {
       if (statusFilter) {
         query = query.eq('status', statusFilter);
       }
+      if (debouncedSearchTerm.trim()) {
+        // Supabase doesn't support OR in .eq, so use ilike with pattern
+        const term = `%${debouncedSearchTerm.trim()}%`;
+        query = query.or(
+          `code.ilike.${term},name.ilike.${term},email.ilike.${term}`
+        );
+      }
       const { data: ordersData, error: ordersError } = await query;
 
       if (ordersError) {
         console.error('Error loading orders:', ordersError);
+        setOrders([]);
       } else if (ordersData) {
         const formattedOrders: Order[] = ordersData.map((order) => ({
           id: order.id,
@@ -101,7 +104,6 @@ const AdminDashboardPage: React.FC = () => {
           created: order.created_at,
           isRedeemed: order.isRedeemed || false,
         }));
-
         setOrders(formattedOrders);
 
         // Extract recently redeemed orders for notifications
@@ -126,11 +128,38 @@ const AdminDashboardPage: React.FC = () => {
         setNotifications(redemptionNotifications);
       }
 
+      // Get total count (filtered)
+      let countQuery = supabase
+        .from('cheap-play-zone')
+        .select('*', { count: 'exact', head: true });
+      if (statusFilter) {
+        countQuery = countQuery.eq('status', statusFilter);
+      }
+      if (debouncedSearchTerm.trim()) {
+        const term = `%${debouncedSearchTerm.trim()}%`;
+        countQuery = countQuery.or(
+          `code.ilike.${term},name.ilike.${term},email.ilike.${term}`
+        );
+      }
+      const { count, error: countError } = await countQuery;
+      if (!countError && typeof count === 'number') {
+        setTotalRows(count);
+      } else {
+        setTotalRows(0);
+      }
+
       setIsLoading(false);
     };
 
     checkSessionAndLoadData();
-  }, [router, refreshTrigger, statusFilter, currentPage, itemsPerPage]);
+  }, [
+    router,
+    refreshTrigger,
+    statusFilter,
+    currentPage,
+    itemsPerPage,
+    debouncedSearchTerm,
+  ]);
 
   // Pagination logic (now using totalRows from Supabase count)
   const totalPages = Math.ceil(totalRows / itemsPerPage);
