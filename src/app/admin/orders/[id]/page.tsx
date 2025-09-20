@@ -105,6 +105,7 @@ export default function EditOrder() {
               to: order.email,
               subject: 'Your Game Login Information',
               text: loginInfo,
+              orderId: order.id,
             }),
           });
         } catch (emailErr) {
