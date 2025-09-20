@@ -43,6 +43,16 @@ const AdminDashboardPage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
+  // NEW: Processing modal state
+  const [isProcessingModalOpen, setIsProcessingModalOpen] = useState(false);
+  const [selectedProcessingOrder, setSelectedProcessingOrder] =
+    useState<Order | null>(null);
+  const [processingMessage, setProcessingMessage] = useState('');
+  const [isProcessingSubmitting, setIsProcessingSubmitting] = useState(false);
+  const [pendingProcessingOrders, setPendingProcessingOrders] = useState<
+    Order[]
+  >([]);
+
   // Debounce searchTerm
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -232,6 +242,143 @@ const AdminDashboardPage: React.FC = () => {
     setOrderToDelete(null);
   };
 
+  // NEW: Fetch function for processing orders
+  const fetchPendingProcessingOrders = async () => {
+    try {
+      // Calculate 20 minutes ago
+      const twentyMinutesAgo = new Date(
+        Date.now() - 20 * 60 * 1000
+      ).toISOString();
+
+      // Fetch orders where updated_at > current time - 20 min
+      const { data: ordersData, error } = await supabase
+        .from('cheap-play-zone')
+        .select('*')
+        .gte('updated_at', twentyMinutesAgo)
+        .not('accessCode', 'is', null);
+
+      if (error) {
+        console.error('Error fetching pending processing orders:', error);
+        return;
+      }
+
+      if (ordersData) {
+        // Filter by accessCode.submitted = false
+        const pendingOrders = ordersData
+          .filter((order) => {
+            if (!order.accessCode || typeof order.accessCode !== 'object')
+              return false;
+            return order.accessCode.submitted === false;
+          })
+          .map((order) => ({
+            id: order.id,
+            code: order.code,
+            orderId: order.orderId || null,
+            status: order.status || 'pending',
+            loginInfo: order.loginInfo || null,
+            email: order.email || null,
+            name: order.name || null,
+            created: order.created_at,
+            isRedeemed: order.isRedeemed || false,
+            created_at: order.created_at,
+            updated_at: order.updated_at,
+            accessCode: order.accessCode || null,
+          }));
+
+        // Save to state
+        setPendingProcessingOrders(pendingOrders);
+
+        // Show modal if there are pending orders
+        if (pendingOrders.length > 0) {
+          // Automatically open modal for first pending order
+          setSelectedProcessingOrder(pendingOrders[0]);
+          setProcessingMessage('');
+          setIsProcessingModalOpen(true);
+        } else {
+          alert('No orders need processing at this time.');
+        }
+      }
+    } catch (error) {
+      console.error('Error in fetchPendingProcessingOrders:', error);
+    }
+  };
+
+  // NEW: Open processing modal
+  const handleOpenProcessingModal = (order: Order) => {
+    setSelectedProcessingOrder(order);
+    setProcessingMessage('');
+    setIsProcessingModalOpen(true);
+  };
+
+  // NEW: Close processing modal
+  const handleCloseProcessingModal = () => {
+    setIsProcessingModalOpen(false);
+    setSelectedProcessingOrder(null);
+    setProcessingMessage('');
+  };
+
+  // NEW: Submit processing
+  const handleSubmitProcessing = async () => {
+    if (!selectedProcessingOrder || !processingMessage.trim()) {
+      alert('Please enter a message');
+      return;
+    }
+
+    setIsProcessingSubmitting(true);
+
+    try {
+      // Get current accessCode
+      const currentAccessCode = selectedProcessingOrder.accessCode as any;
+
+      // Update accessCode with submitted: true and message
+      const updatedAccessCode = {
+        ...currentAccessCode,
+        submitted: true,
+        message: processingMessage.trim(),
+      };
+
+      const { error } = await supabase
+        .from('cheap-play-zone')
+        .update({
+          accessCode: updatedAccessCode,
+          updated_at: new Date().toISOString(),
+          status: 'delivered',
+        })
+        .eq('id', selectedProcessingOrder.id);
+
+      if (error) {
+        console.error('Error updating order:', error);
+        alert('Failed to update order. Please try again.');
+        return;
+      }
+
+      // Remove processed order from pending list
+      setPendingProcessingOrders((prev) =>
+        prev.filter((o) => o.id !== selectedProcessingOrder.id)
+      );
+
+      // Close modal
+      handleCloseProcessingModal();
+
+      alert('Order processed successfully!');
+
+      // If there are more orders, show next one
+      const remainingOrders = pendingProcessingOrders.filter(
+        (o) => o.id !== selectedProcessingOrder.id
+      );
+      if (remainingOrders.length > 0) {
+        setSelectedProcessingOrder(remainingOrders[0]);
+        setProcessingMessage('');
+        setIsProcessingModalOpen(true);
+      }
+    } catch (error) {
+      console.error('Error processing order:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setIsProcessingSubmitting(false);
+    }
+  };
+
   const handleDeleteSelected = async () => {
     if (selectedOrders.length === 0) return;
 
@@ -318,6 +465,76 @@ const AdminDashboardPage: React.FC = () => {
               Cancel Order
             </button>
           </div>
+        </div>
+      </Modal>
+
+      {/* NEW: Processing Modal */}
+      <Modal
+        isOpen={isProcessingModalOpen}
+        onClose={handleCloseProcessingModal}
+        title="Process Order"
+      >
+        <div className="space-y-4">
+          {selectedProcessingOrder && (
+            <>
+              <div className="bg-gray-700 p-4 rounded space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Order ID:</span>
+                  <span className="font-medium">
+                    {selectedProcessingOrder.id}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Email:</span>
+                  <span className="font-medium">
+                    {selectedProcessingOrder.email || 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Access Code:</span>
+                  <span className="font-medium">
+                    {selectedProcessingOrder.accessCode &&
+                    typeof selectedProcessingOrder.accessCode === 'object'
+                      ? (selectedProcessingOrder.accessCode as any).code
+                      : 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-2">
+                  Message for Customer
+                </label>
+                <textarea
+                  value={processingMessage}
+                  onChange={(e) => setProcessingMessage(e.target.value)}
+                  placeholder="Enter the message to send to the customer..."
+                  className="w-full bg-gray-700 border border-gray-600 rounded p-3 text-white h-32 resize-none"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={handleCloseProcessingModal}
+                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitProcessing}
+                  disabled={isProcessingSubmitting || !processingMessage.trim()}
+                  className={`px-4 py-2 rounded transition-colors ${
+                    isProcessingSubmitting || !processingMessage.trim()
+                      ? 'bg-gray-600 cursor-not-allowed'
+                      : 'bg-orange-600 hover:bg-orange-700'
+                  } text-white`}
+                >
+                  {isProcessingSubmitting ? 'Processing...' : 'Submit'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </Modal>
 
@@ -412,6 +629,12 @@ const AdminDashboardPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
+          <button
+            onClick={fetchPendingProcessingOrders}
+            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded transition-colors"
+          >
+            Check Processing ({pendingProcessingOrders.length})
+          </button>
           <button
             onClick={() => setIsCodeModalOpen(true)}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors"

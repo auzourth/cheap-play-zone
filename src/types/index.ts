@@ -10,6 +10,7 @@ export interface Order {
   loginInfo?: string;
   created_at?: string;
   updated_at?: string;
+  accessCode?: any; // JSONB field containing code, submitted, createdAt, message
 }
 
 export interface User {
