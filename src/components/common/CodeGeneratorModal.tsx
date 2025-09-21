@@ -8,7 +8,6 @@ import { supabase } from '../../lib/supabase';
 
 interface GeneratedCode {
   name: string;
-  email: string;
   code: string;
 }
 
@@ -22,7 +21,6 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
   onClose,
 }) => {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [generatedCodes, setGeneratedCodes] = useState<GeneratedCode[]>([]);
   const [isCopied, setIsCopied] = useState<boolean>(false);
@@ -34,7 +32,6 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
     for (let i = 0; i < quantity; i++) {
       codes.push({
         name,
-        email,
         code: uuidv4().replace(/-/g, '').substring(0, 12).toUpperCase(),
       });
     }
@@ -43,7 +40,6 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
 
   const handleSaveGeneratedCode = async (generatedCode: {
     name: string;
-    email: string;
     code: string;
   }) => {
     setSavedCodes((prev) => ({ ...prev, [generatedCode.code]: true }));
@@ -53,7 +49,6 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
         .insert({
           code: generatedCode.code,
           name: generatedCode.name,
-          email: generatedCode.email,
           status: 'pending',
           isRedeemed: false,
         })
@@ -72,7 +67,6 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
 
   const resetForm = () => {
     setName('');
-    setEmail('');
     setQuantity(1);
     setGeneratedCodes([]);
     setIsCopied(false);
@@ -95,14 +89,6 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
               onChange={setName}
               placeholder="Enter recipient name"
               required
-            />
-
-            <InputField
-              label="Email (Optional)"
-              value={email}
-              onChange={setEmail}
-              placeholder="Enter recipient email"
-              type="email"
             />
 
             <div>
@@ -154,19 +140,6 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
                     <span className="text-gray-400 text-sm">Name:</span>
                     <p>{generatedCode.name}</p>
                   </div>
-
-                  {generatedCode.email && (
-                    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 mb-2">
-                      <span className="text-gray-400 text-sm">Email:</span>
-                      <p>{generatedCode.email}</p>
-                      <button
-                        onClick={() => copyToClipboard(generatedCode.email)}
-                        className="p-2 hover:bg-gray-600 rounded transition-colors"
-                      >
-                        <Copy size={16} />
-                      </button>
-                    </div>
-                  )}
 
                   <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 mb-2">
                     <span className="text-gray-400 text-sm">
