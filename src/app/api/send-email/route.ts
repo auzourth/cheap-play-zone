@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request: NextRequest) {
   try {
-    const { to, subject, text, orderId } = await request.json();
+    const { to, subject, text } = await request.json();
 
     if (!to || !subject || !text) {
       return NextResponse.json(
@@ -25,34 +25,9 @@ export async function POST(request: NextRequest) {
       tls: { rejectUnauthorized: false },
     });
 
-    // Create the formatted email content
-    const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-    const videoGuideUrl = `${baseUrl}/order/${orderId}`;
-    const loginWebsiteUrl = `${baseUrl}/order/${orderId}`;
-
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <p>Dear Customer,</p>
-        
-        <p>We are pleased to inform you that your account is now ready for use. To activate your account, please follow the video guide</p>
-        
-        <p><strong>Video Guide</strong> <a href="${videoGuideUrl}" style="color: #007bff; text-decoration: none;">click here</a></p>
-        
-        <p><strong>Internal Order id:</strong><br>
-        Super Smash Bros ${orderId}</p>
-        
-        <p><strong>Log-in website</strong> <a href="${loginWebsiteUrl}" style="color: #007bff; text-decoration: none;">Click here</a></p>
-        
-        <p>Please carefully review the video guide. For any questions or further assistance, feel free to visit PSNAccounts and</p>
-        
-        <p>Additionally, a FAQ list is included in this email to address common queries.</p>
-        
-        <p><strong>Login Information:</strong></p>
-        <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 15px 0;">
-          <pre style="margin: 0; font-family: 'Courier New', monospace; white-space: pre-wrap;">${text}</pre>
-        </div>
-        
-        <p>We hope you enjoy your gaming experience!</p>
+        <pre style="margin: 0; white-space: pre-wrap; font-size: 14px; line-height: 1.4;">${text}</pre>
       </div>
     `;
 

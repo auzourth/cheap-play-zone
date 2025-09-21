@@ -103,7 +103,7 @@ export default function EditOrder() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: order.email,
-              subject: 'Your Game Login Information',
+              subject: 'Game Information',
               text: loginInfo,
               orderId: order.id,
             }),
