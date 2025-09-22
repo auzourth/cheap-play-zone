@@ -267,8 +267,10 @@ export default function OrderPage() {
           {modalType === 'countdown' && (
             <>
               <p className="text-gray-300 mb-6">
-                Processing will be completed within {formatTime(countdown)}.
-                Please do not close the browser.
+                Please do not close the Nintendo code page. It will update
+                automatically. Once it changes, you can close this countdown,
+                resubmit the form, and your 5 digits access code with details
+                will appear.
               </p>
 
               <div className="mb-6">
