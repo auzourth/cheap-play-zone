@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, Save } from 'lucide-react';
@@ -21,6 +21,9 @@ export default function EditOrder() {
   const [error, setError] = useState('');
   const [order, setOrder] = useState<Order>();
   const [isLoading, setIsLoading] = useState(true);
+  const preRef = useRef<HTMLPreElement>(null);
+  const placeholderText =
+    'Enter login details, instructions, or any information to provide to the customer...';
 
   // Fetch order from Supabase
   useEffect(() => {
@@ -65,10 +68,24 @@ export default function EditOrder() {
     fetchOrder();
   }, [id, router]);
 
+  // Update pre content when loginInfo changes (from database)
+  useEffect(() => {
+    if (preRef.current && loginInfo) {
+      preRef.current.textContent = loginInfo;
+    }
+  }, [loginInfo]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!loginInfo.trim()) {
+    // Get content directly from the pre element
+    const currentContent = preRef.current?.textContent || '';
+    console.log('Current content:', currentContent);
+    const actualLoginInfo =
+      currentContent === placeholderText ? '' : currentContent;
+    console.log('Actual login info:', actualLoginInfo);
+
+    if (!actualLoginInfo) {
       setError('Login information is required');
       return;
     }
@@ -85,7 +102,7 @@ export default function EditOrder() {
       const { error: updateError } = await supabase
         .from('cheap-play-zone')
         .update({
-          loginInfo: loginInfo, // Enable loginInfo update
+          loginInfo: actualLoginInfo, // Use content from pre element
           status: 'processing',
           updated_at: new Date().toISOString(),
         })
@@ -104,7 +121,7 @@ export default function EditOrder() {
             body: JSON.stringify({
               to: order.email,
               subject: 'Game Information',
-              text: loginInfo,
+              text: actualLoginInfo,
               orderId: order.id,
             }),
           });
@@ -116,7 +133,7 @@ export default function EditOrder() {
 
       // Also update in local state for backwards compatibility
       if (updateOrderStatus) {
-        updateOrderStatus(order.code, 'completed', loginInfo);
+        updateOrderStatus(order.code, 'completed', actualLoginInfo);
       }
 
       // Return to dashboard
@@ -208,12 +225,16 @@ export default function EditOrder() {
             <label className="block text-gray-400 mb-2">
               Login Information
             </label>
-            <textarea
-              value={loginInfo}
-              onChange={(e) => setLoginInfo(e.target.value)}
-              placeholder="Enter login details, instructions, or any information to provide to the customer..."
-              className="w-full bg-gray-700 border border-gray-600 rounded p-3 text-white h-40"
-            ></textarea>
+            <pre
+              ref={preRef}
+              contentEditable
+              className="w-full bg-gray-700 border border-gray-600 rounded p-3 text-white h-40 font-mono whitespace-pre-wrap overflow-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}
+              suppressContentEditableWarning={true}
+              dangerouslySetInnerHTML={{
+                __html: loginInfo || placeholderText,
+              }}
+            />
           </div>
 
           <div className="flex justify-end">
