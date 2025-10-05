@@ -176,7 +176,7 @@ export default function Redeem() {
           email,
           updated_at: new Date().toISOString(),
           isRedeemed: true, // Mark the code as redeemed
-          status: 'pending', // Update status to pending
+          status: 'processing', // Update status to processing
         })
         .eq('code', code);
 

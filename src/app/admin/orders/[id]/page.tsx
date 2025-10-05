@@ -103,7 +103,7 @@ export default function EditOrder() {
         .from('cheap-play-zone')
         .update({
           loginInfo: actualLoginInfo, // Use content from pre element
-          status: 'processing',
+          status: 'completed',
           updated_at: new Date().toISOString(),
         })
         .eq('id', order.id);
