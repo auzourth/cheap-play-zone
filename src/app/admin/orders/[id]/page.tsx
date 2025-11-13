@@ -66,6 +66,7 @@ export default function EditOrder() {
               setCredentialPassword(orderData.loginInfo);
             }
           } catch (e) {
+            console.error('Error parsing loginInfo:', e);
             setCredentialPassword(orderData.loginInfo);
           }
         }

@@ -95,7 +95,6 @@ export default function Redeem() {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [codeExists, setCodeExists] = useState(true);
   const [notification, setNotification] = useState<{
     message: string;
@@ -203,7 +202,7 @@ export default function Redeem() {
 
       // If the code has already been redeemed (not pending), show error
       if (data && data.status === 'delivered') {
-        setError('This code has already been redeemed. check track order page');
+        console.log('This code has already been redeemed. check track order page');
         return;
       }
 
@@ -218,17 +217,11 @@ export default function Redeem() {
     e.preventDefault();
 
     if (!code) {
-      setError('Redeem code is required');
+      console.log('Redeem code is required');
       return;
     }
 
-    // if (!acceptTerms) {
-    //   setError('Please accept the terms to continue');
-    //   return;
-    // }
-
     setLoading(true);
-    setError('');
 
     try {
       // Check if code exists in Supabase
@@ -246,13 +239,13 @@ export default function Redeem() {
       }
 
       if (!existingOrder) {
-        setError('Invalid redemption code. Please check and try again.');
+        console.log('Invalid redemption code. Please check and try again.');
         setLoading(false);
         return;
       }
 
       if (existingOrder.status === 'delivered') {
-        setError('This code has already been redeemed. check track order page');
+        console.log('This code has already been redeemed. check track order page');
         setLoading(false);
         return;
       }
@@ -291,7 +284,7 @@ export default function Redeem() {
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : 'Please try again.';
-      setError('Failed to redeem code: ' + errorMessage);
+      console.log('Failed to redeem code: ' + errorMessage);
       showNotification(`Failed to redeem: ${errorMessage}`, 'error');
       console.error(err);
       setLoading(false);
@@ -310,8 +303,8 @@ export default function Redeem() {
           <p>
             <strong>Important!</strong> Open this page without translators (use original English language)
           </p>
-          <p>Don't change email and password because you may lose access to the account</p>
-          <p>Use "console sharing and offline play"</p>
+          <p>Don&apos;t change email and password because you may lose access to the account</p>
+          <p>Use &quot;console sharing and offline play&quot;</p>
           <p>WRITE <span className='text-amber-400 font-bold text-lg'>agree</span> to empty area under and PRESS to CONFIRM to get purchase</p>
           <p>Read instructions carefully and follow them</p>
         </div>
@@ -591,7 +584,7 @@ export default function Redeem() {
                       <li className="mt-1">
                         <p className="mt-2">
                           <strong>Step 2.</strong> On the left side of your screen choose the <b>Get Started</b> button.
-                          <br />(<b>Do NOT use "Play as One-Time Guest" option</b>, because the game will not work on your personal account)
+                          <br />(<b>Do NOT use &quot;Play as One-Time Guest&quot; option</b>, because the game will not work on your personal account)
                         </p>
                         <a className="screenshot mt-2 block" href={imageStep2.src} target="_blank" rel="noreferrer">
                           <img src={imageStep2.src} alt="PS5 step 2" className="w-full rounded" />
@@ -625,7 +618,7 @@ export default function Redeem() {
                         <p className="mt-2">
                           <strong>Step 6.</strong> Type in the <b>Verification code</b> received in the email with the credentials.
                           <br />
-                          If the verification code doesn't work, use{' '}
+                          If the verification code doesn&apos;t work, use{' '}
                           <a className="text-amber-400 underline" href="#" onClick={(e) => e.preventDefault()}>
                             this form
                           </a>{' '}
@@ -639,7 +632,7 @@ export default function Redeem() {
                         <p className="mt-2">
                           <strong>Step 7.</strong> If you are asked to upgrade the account, please <b>SKIP</b> this phase.
                           <br />
-                          However, if you've already upgraded it, use{' '}
+                          However, if you&apos;ve already upgraded it, use{' '}
                           <a className="text-amber-400 underline" href="#" onClick={(e) => e.preventDefault()}>
                             this form
                           </a>{' '}
@@ -654,7 +647,7 @@ export default function Redeem() {
                       <li className="mt-1">
                         <p className="mt-2">
                           <strong>Step 8.</strong> Head over to the <b>Game Library</b> then click <b>Your Collection</b>.
-                          <br />There you will find the game you've purchased.
+                          <br />There you will find the game you&apos;ve purchased.
                         </p>
                         <a className="screenshot mt-2 block" href={imageStep8.src} target="_blank" rel="noreferrer">
                           <img src={imageStep8.src} alt="PS5 step 8" className="w-full rounded" />
@@ -686,7 +679,7 @@ export default function Redeem() {
                       <ol className="space-y-4 list-decimal pl-5">
                         <li>
                           <p className="mt-2">
-                            If the game doesn't work on your personal account, please try login again with the received account, use the{' '}
+                            If the game doesn&apos;t work on your personal account, please try login again with the received account, use the{' '}
                             <span className="text-amber-400">form</span> to get a new code.
                           </p>
                           <a className="screenshot mt-2 block" href={imageTrouble1.src} target="_blank" rel="noreferrer">
@@ -709,7 +702,7 @@ export default function Redeem() {
                           <p className="mt-2">
                             Make sure <b>Console Sharing and Offline Play</b> is enabled.
                             <br />
-                            Now, maybe you've added the account as a guest and that will make it disappear from your console, so you won't have the possibility to enable "Console Sharing and Offline Play". So please make sure you've added the account as a user and not as a guest.
+                            Now, maybe you&apos;ve added the account as a guest and that will make it disappear from your console, so you won&apos;t have the possibility to enable &quot;Console Sharing and Offline Play&quot;. So please make sure you&apos;ve added the account as a user and not as a guest.
                           </p>
                           <a className="screenshot mt-2 block" href={imageTrouble4.src} target="_blank" rel="noreferrer">
                             <img src={imageTrouble4.src} alt="PS5 troubleshooting 4" className="w-full rounded" />
@@ -760,7 +753,7 @@ export default function Redeem() {
                         <a className="text-amber-400" href="#" onClick={(e) => e.preventDefault()}>
                           this page
                         </a>{' '}
-                        or <b>use the chatbox</b> (bottom-right of this page). Type in the Verification code received in the email with the credentials. If the verification code doesn't work, use{' '}
+                        or <b>use the chatbox</b> (bottom-right of this page). Type in the Verification code received in the email with the credentials. If the verification code doesn&apos;t work, use{' '}
                         <a className="text-amber-400" href="#" onClick={(e) => e.preventDefault()}>
                           this form
                         </a>{' '}
@@ -768,10 +761,10 @@ export default function Redeem() {
                       </li>
                       <li>Press on <b>Next</b> (or equivalent if the account is from another region)</li>
                       <li>Press on <b>Edit - Activate as primary</b> (or equivalent if the account is from another region).</li>
-                      <li>Press on <b>Confirm</b> ("Bestätigen", or equivalent if the account is from another region).</li>
-                      <li>Press on <b>Next</b> ("Weiter", or equivalent if the account is from another region).</li>
-                      <li>Press on <b>Next</b> ("Weiter", or equivalent if the account is from another region).</li>
-                      <li>Press on <b>Next</b> ("Weiter", or equivalent if the account is from another region).</li>
+                      <li>Press on <b>Confirm</b> (&quot;Bestätigen&quot;, or equivalent if the account is from another region).</li>
+                      <li>Press on <b>Next</b> (&quot;Weiter&quot;, or equivalent if the account is from another region).</li>
+                      <li>Press on <b>Next</b> (&quot;Weiter&quot;, or equivalent if the account is from another region).</li>
+                      <li>Press on <b>Next</b> (&quot;Weiter&quot;, or equivalent if the account is from another region).</li>
                       <li>Press <b>OK</b>.</li>
                       <li>Hold the <b>middle PS button</b> on the controller and press on <b>Switch User</b></li>
                       <li>
