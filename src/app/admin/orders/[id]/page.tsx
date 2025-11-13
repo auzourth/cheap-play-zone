@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, Save } from 'lucide-react';
+import InputField from '@/components/ui/InputField';
 import { useAppContext } from '@/context/AppContext';
 import { supabase } from '@/lib/supabase';
 import { Order } from '../../../../types';
@@ -14,7 +15,9 @@ export default function EditOrder() {
   const { id } = params;
   const { updateOrderStatus } = useAppContext();
 
-  const [loginInfo, setLoginInfo] = useState('');
+  const [credentialEmail, setCredentialEmail] = useState('');
+  const [credentialPassword, setCredentialPassword] = useState('');
+  const [credentialTwoFA, setCredentialTwoFA] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [order, setOrder] = useState<Order>();
@@ -53,7 +56,18 @@ export default function EditOrder() {
       if (orderData) {
         setOrder(orderData);
         if (orderData.loginInfo) {
-          setLoginInfo(orderData.loginInfo);
+          try {
+            const parsed = JSON.parse(orderData.loginInfo);
+            if (parsed && typeof parsed === 'object') {
+              setCredentialEmail(parsed.email ?? '');
+              setCredentialPassword(parsed.password ?? parsed.pass ?? '');
+              setCredentialTwoFA(parsed.twoFA ?? parsed.twofa ?? parsed.guard ?? '');
+            } else {
+              setCredentialPassword(orderData.loginInfo);
+            }
+          } catch (e) {
+            setCredentialPassword(orderData.loginInfo);
+          }
         }
       }
 
@@ -66,8 +80,9 @@ export default function EditOrder() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!loginInfo.trim()) {
-      setError('Login information is required');
+    // Require email and password filled
+    if (!credentialEmail.trim() || !credentialPassword.trim()) {
+      setError('Email and password are required');
       return;
     }
 
@@ -80,10 +95,17 @@ export default function EditOrder() {
         throw new Error('Order not found');
       }
 
+      // Save as JSON string (email, password, twoFA)
+      const payload = {
+        email: credentialEmail,
+        password: credentialPassword,
+        twoFA: credentialTwoFA,
+      };
+
       const { error: updateError } = await supabase
         .from('cheap-play-zone')
         .update({
-          loginInfo: loginInfo, // Enable loginInfo update
+          loginInfo: JSON.stringify(payload),
           status: 'completed',
           updated_at: new Date().toISOString(),
           completed: JSON.stringify({
@@ -100,7 +122,7 @@ export default function EditOrder() {
 
       // Also update in local state for backwards compatibility
       if (updateOrderStatus) {
-        updateOrderStatus(order.code, 'completed', loginInfo);
+        updateOrderStatus(order.code, 'completed', JSON.stringify(payload));
       }
 
       // Return to dashboard
@@ -188,16 +210,30 @@ export default function EditOrder() {
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label className="block text-gray-400 mb-2">
-              Login Information
-            </label>
-            <textarea
-              value={loginInfo}
-              onChange={(e) => setLoginInfo(e.target.value)}
-              placeholder="Enter login details, instructions, or any information to provide to the customer..."
-              className="w-full bg-gray-700 border border-gray-600 rounded p-3 text-white h-40"
-            ></textarea>
+          <div className="mb-6 space-y-4">
+            <InputField
+              label="Credential Email"
+              value={credentialEmail}
+              onChange={setCredentialEmail}
+              placeholder="customer-login@example.com"
+              type="email"
+              required
+            />
+            <InputField
+              label="Credential Password"
+              value={credentialPassword}
+              onChange={setCredentialPassword}
+              placeholder="Enter supplied password"
+              type="text"
+              required
+            />
+            <InputField
+              label="2FA Recovery Code (optional)"
+              value={credentialTwoFA}
+              onChange={setCredentialTwoFA}
+              placeholder="Enter 2FA / Guard code if available"
+              type="text"
+            />
           </div>
 
           <div className="flex justify-end">

@@ -6,9 +6,9 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-black text-white py-8">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">Speed Gaming</h3>
+            <h3 className="text-xl font-bold mb-4">Chape Play Zone</h3>
             <p className="text-gray-400">
               Pre-purchased Video Games Delivered Via Accounts
             </p>
@@ -17,7 +17,7 @@ const Footer: React.FC = () => {
             </p>
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="text-xl font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
@@ -25,12 +25,6 @@ const Footer: React.FC = () => {
                   Home
                 </Link>
               </li>
-              <li>
-                <Link href="/about" className="text-gray-400 hover:text-white">
-                  About
-                </Link>
-              </li>
-
               <li>
                 <Link href="/faq" className="text-gray-400 hover:text-white">
                   FAQ
@@ -50,9 +44,9 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <h3 className="text-xl font-bold mb-4">Support</h3>
             <a
               href="https://supporthub.g2a.com/marketplace/en/Problem-Solving/how-can-i-contact-the-seller-if-i-have-a-question-or-problem-with-my-item"
@@ -62,12 +56,12 @@ const Footer: React.FC = () => {
             >
               Need our help?
             </a>
-          </div>
+          </div> */}
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
           <p>
-            &copy; {new Date().getFullYear()} Speed Gaming. All rights reserved.
+            &copy; {new Date().getFullYear()} Chape Play Zone. All rights reserved.
           </p>
         </div>
       </div>

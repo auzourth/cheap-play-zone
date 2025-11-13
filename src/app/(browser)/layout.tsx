@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
 import Header from '@/components/common/Header';
 import { AppProvider } from '@/context/AppContext';
+import Footer from '@/components/common/Footer';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Speed Gaming',
+  title: 'Chape Play Zone - Game Keys and Digital Products',
   description: 'Your trusted source for game keys and digital products',
 };
 
@@ -32,7 +33,7 @@ export default function RootLayout({
         <AppProvider>
           <Header />
           <div className="flex-grow">{children}</div>
-          {/* <Footer /> */}
+          <Footer />
         </AppProvider>
       </body>
     </html>

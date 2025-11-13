@@ -25,7 +25,7 @@ const Header: React.FC = () => {
     <header className="bg-gray-800 px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link href="/">
-          <h1 className="text-xl font-bold">Speed Gaming</h1>
+          <h1 className="text-xl font-bold">Chape Play Zone</h1>
         </Link>
 
         <nav className="flex items-center space-x-6">
