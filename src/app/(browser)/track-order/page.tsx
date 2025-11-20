@@ -95,9 +95,8 @@ export default function TrackOrder() {
           <button
             type="submit"
             disabled={loading}
-            className={`bg-[#f2951d] hover:bg-orange-400 text-white text-sm font-medium px-6 py-3 rounded-md transition-colors ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`bg-[#f2951d] hover:bg-orange-400 text-white text-sm font-medium px-6 py-3 rounded-md transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
           >
             {loading ? 'Tracking...' : 'Track'}
           </button>

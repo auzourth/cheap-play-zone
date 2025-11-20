@@ -53,11 +53,10 @@ const Notification = ({
 
   return (
     <div
-      className={`fixed top-4 right-4 flex items-center p-4 rounded-lg shadow-lg transition-all transform duration-500 z-50 ${
-        type === 'success'
-          ? 'bg-green-900/80 border border-green-500'
-          : 'bg-red-900/80 border border-red-500'
-      }`}
+      className={`fixed top-4 right-4 flex items-center p-4 rounded-lg shadow-lg transition-all transform duration-500 z-50 ${type === 'success'
+        ? 'bg-green-900/80 border border-green-500'
+        : 'bg-red-900/80 border border-red-500'
+        }`}
     >
       {type === 'success' ? (
         <CheckCircle size={20} className="text-green-400 mr-2" />
@@ -88,9 +87,9 @@ export default function Redeem() {
     isRedeemed: boolean;
     processing: string;
     completed: string;
-  remaining?: number;
-  views?: number;
-  password?: string;
+    remaining?: number;
+    views?: number;
+    password?: string;
   }>();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -153,6 +152,8 @@ export default function Redeem() {
   };
 
   useLayoutEffect(() => {
+    if (!code) return;
+
     // fetch order from Supabase
     const fetchOrder = async () => {
       const { data: ordersData } = await supabase
@@ -161,8 +162,16 @@ export default function Redeem() {
         .eq('code', code)
         .single();
       if (ordersData) {
+        if (ordersData.status === 'pending') {
+          await supabase
+            .from('cheap-play-zone')
+            .update({ status: 'processing' })
+            .eq('code', code);
+          ordersData.status = 'processing';
+        }
+
         const loginInfo = await JSON.parse(ordersData.loginInfo);
-        setOrder({...ordersData, loginInfo});
+        setOrder({ ...ordersData, loginInfo });
         setEmail(ordersData.email || '');
       }
     };
@@ -322,11 +331,10 @@ export default function Redeem() {
           <button
             onClick={handleCloseNotice}
             disabled={!isNoticeAgree}
-            className={`py-2 px-4 rounded font-semibold transition-colors ${
-              isNoticeAgree
-                ? 'bg-amber-500 hover:bg-amber-600 text-black'
-                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-            }`}
+            className={`py-2 px-4 rounded font-semibold transition-colors ${isNoticeAgree
+              ? 'bg-amber-500 hover:bg-amber-600 text-black'
+              : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              }`}
           >
             Confirm
           </button>
@@ -353,72 +361,72 @@ export default function Redeem() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
             <div className="hero__content py-6 cg-left w-full px-4 space-y-6">
-            {/* Remaining views and header */}
-            {order ? (
-              <>
-                <div className="flex items-center gap-4">
-                  <span className="hero__eyebrow text-sm text-gray-400">Remaining views</span>
-                  <span className="text-2xl font-semibold text-white">{order.remaining ?? order.views ?? 16}</span>
-                </div>
-                <h1 className="hero__title text-5xl md:text-6xl font-extrabold text-white leading-tight">
-                  Confirmation required
-                </h1>
-                <p className="hero__lead text-gray-400 max-w-prose">
-                  This link’s content can be viewed up to <strong className="text-white">20</strong> times.<br />
-                  After reaching this limit, the link will be deleted.<br />
-                  Please confirm that you wish to view the content of this link.
-                </p>
+              {/* Remaining views and header */}
+              {order ? (
+                <>
+                  <div className="flex items-center gap-4">
+                    <span className="hero__eyebrow text-sm text-gray-400">Remaining views</span>
+                    <span className="text-2xl font-semibold text-white">{order.remaining ?? order.views ?? 16}</span>
+                  </div>
+                  <h1 className="hero__title text-3xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
+                    Confirmation required
+                  </h1>
+                  <p className="hero__lead text-gray-400 max-w-prose">
+                    This link’s content can be viewed up to <strong className="text-white">20</strong> times.<br />
+                    After reaching this limit, the link will be deleted.<br />
+                    Please confirm that you wish to view the content of this link.
+                  </p>
 
-                <form
-                  className="form mt-4"
-                  onSubmit={handleSubmit}
-                >
-                  <div className="form__flex flex items-center gap-4">
-                    <button
-                      type="submit"
-                      className="inline-flex items-center gap-2 bg-amber-500 text-black py-3 px-5 rounded-lg font-semibold shadow"
-                      disabled={loading || !codeExists || order?.isRedeemed}
-                    >
-                      <CheckCircle />
-                      {loading ? 'Processing...' : 'Confirm'}
-                    </button>
+                  <form
+                    className="form mt-4"
+                    onSubmit={handleSubmit}
+                  >
+                    <div className="form__flex flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                      <button
+                        type="submit"
+                        className="inline-flex justify-center items-center gap-2 bg-amber-500 text-black py-3 px-5 rounded-lg font-semibold shadow"
+                        disabled={loading || !codeExists || order?.isRedeemed}
+                      >
+                        <CheckCircle />
+                        {loading ? 'Processing...' : 'Confirm'}
+                      </button>
 
+                      <button
+                        type="button"
+                        className="inline-flex justify-center items-center gap-2 bg-gray-800 text-gray-200 py-3 px-5 rounded-lg"
+                        onClick={() => window.location.reload()}
+                      >
+                        <XCircle />
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+
+                  <small className="smalltip text-gray-400 mt-4 block">
+                    <span className="mr-2">If you need any help, just reach out through the chat in the bottom right corner — our team is ready to assist you.</span>
+                  </small>
+                </>
+              ) : (
+                <>
+                  <h1 className="hero__title text-3xl md:text-4xl font-bold text-white mb-4">
+                    Confirmation required
+                  </h1>
+                  <p className="hero__lead text-gray-300 mb-4">
+                    Order information will be available soon. Please check back in a few minutes.
+                  </p>
+                  <div className="mt-4">
                     <button
-                      type="button"
-                      className="inline-flex items-center gap-2 bg-gray-800 text-gray-200 py-3 px-5 rounded-lg"
                       onClick={() => window.location.reload()}
+                      className="py-2 px-4 bg-amber-500 text-black rounded-md"
                     >
-                      <XCircle />
-                      Cancel
+                      Refresh
                     </button>
                   </div>
-                </form>
+                </>
+              )}
+            </div>
 
-                <small className="smalltip text-gray-400 mt-4 block">
-                  <span className="mr-2">If you need any help, just reach out through the chat in the bottom right corner — our team is ready to assist you.</span>
-                </small>
-              </>
-            ) : (
-              <>
-                <h1 className="hero__title text-3xl md:text-4xl font-bold text-white mb-4">
-                  Confirmation required
-                </h1>
-                <p className="hero__lead text-gray-300 mb-4">
-                  Order information will be available soon. Please check back in a few minutes.
-                </p>
-                <div className="mt-4">
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="py-2 px-4 bg-amber-500 text-black rounded-md"
-                  >
-                    Refresh
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-
-            <div className="hero__media cg-fluid-right hidden md:flex flex-col w-full md:w-1/2 px-4">
+            <div className="hero__media cg-fluid-right flex flex-col w-full md:w-1/2 px-4 mt-8 md:mt-0">
               <div className="mb-6">
                 <div className="flex items-start gap-4">
                   <Lock size={24} className="text-white" />
@@ -432,10 +440,10 @@ export default function Redeem() {
                 </div>
               </div>
 
-              </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
       {showPurchaseDetails && (
         <main className="space-y-16">
@@ -445,7 +453,7 @@ export default function Redeem() {
                 <span className="uppercase tracking-[0.25em] text-xs text-gray-400">
                   Order details
                 </span>
-                <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-tight">
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
                   Your purchase
                 </h1>
                 <p className="text-gray-300 leading-relaxed">
@@ -467,7 +475,7 @@ export default function Redeem() {
                   </a>
                 </div>
                 {order?.loginInfo ? (
-                  <div className="grid grid-cols-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="rounded-2xl border border-gray-800 bg-black/40 p-5 shadow-lg">
                       <p className="truncate text-lg font-medium text-white">
                         {order?.loginInfo?.email ?? '—'}
@@ -518,9 +526,9 @@ export default function Redeem() {
                     </div>
                   </div>
                 ) : (
-                    <div className="rounded-2xl border border-gray-800 bg-black/40 p-6 text-base text-gray-300">
+                  <div className="rounded-2xl border border-gray-800 bg-black/40 p-6 text-base text-gray-300">
                     The order credentials are not available yet. Please check back later or refresh this page in a few hours.
-                    </div>
+                  </div>
                 )}
                 <div className="flex items-start gap-2 text-sm text-gray-400">
                   <AlertTriangle size={16} className="mt-1" />
@@ -568,9 +576,8 @@ export default function Redeem() {
                     />
                   </button>
                   <div
-                    className={`accordion-content overflow-hidden px-6 transition-[max-height] duration-300 ease-in-out ${
-                      accordionState.ps5 ? 'max-h-[4000px] pb-6' : 'max-h-0'
-                    }`}
+                    className={`accordion-content overflow-hidden px-6 transition-[max-height] duration-300 ease-in-out ${accordionState.ps5 ? 'max-h-[4000px] pb-6' : 'max-h-0'
+                      }`}
                   >
                     <ul className="tuts space-y-4 text-sm text-gray-300">
                       <li className="mt-1">
@@ -736,9 +743,8 @@ export default function Redeem() {
                     />
                   </button>
                   <div
-                    className={`accordion-content overflow-hidden px-6 transition-[max-height] duration-300 ease-in-out ${
-                      accordionState.ps4 ? 'max-h-[4000px] pb-6' : 'max-h-0'
-                    }`}
+                    className={`accordion-content overflow-hidden px-6 transition-[max-height] duration-300 ease-in-out ${accordionState.ps4 ? 'max-h-[4000px] pb-6' : 'max-h-0'
+                      }`}
                   >
                     <ol className="space-y-3 list-decimal pl-5 text-sm text-gray-300">
                       <li>Go to <b>Settings</b></li>

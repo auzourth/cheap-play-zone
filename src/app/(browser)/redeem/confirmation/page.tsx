@@ -7,7 +7,7 @@ import { CheckCircle } from 'lucide-react';
 export default function RedeemConfirmation() {
   return (
     <div className="container mx-auto px-4 py-16">
-      <div className="max-w-md mx-auto bg-gray-900 p-8 rounded-lg shadow-lg text-center">
+      <div className="max-w-md mx-auto p-8 rounded-lg shadow-lg text-center">
         <div className="flex justify-center mb-6">
           <div className="bg-green-600/20 p-4 rounded-full">
             <CheckCircle size={48} className="text-green-500" />

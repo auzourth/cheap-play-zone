@@ -15,11 +15,13 @@ interface GeneratedCode {
 interface CodeGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCodeSaved?: () => void;
 }
 
 const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
   isOpen,
   onClose,
+  onCodeSaved,
 }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -73,6 +75,10 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
         alert('Error saving to Supabase. Fallback to local context.');
         console.error('Error saving to Supabase:', error);
         setSavedCodes((prev) => ({ ...prev, [generatedCode.code]: false }));
+      } else {
+        if (onCodeSaved) {
+          onCodeSaved();
+        }
       }
     } catch (err) {
       console.error('Exception when saving code:', err);
@@ -209,18 +215,6 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
                       <Copy size={16} />
                     </button>
                   </div>
-
-                  <button
-                    onClick={() => handleSaveGeneratedCode(generatedCode)}
-                    disabled={!!savedCodes[generatedCode.code]}
-                    className={`w-full mt-2 text-white py-2 px-4 rounded transition-colors ${
-                      savedCodes[generatedCode.code]
-                        ? 'bg-gray-500 cursor-not-allowed'
-                        : 'bg-green-600 hover:bg-green-700'
-                    }`}
-                  >
-                    {savedCodes[generatedCode.code] ? 'Saved' : 'Save Code'}
-                  </button>
                 </div>
               ))}
             </div>

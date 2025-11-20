@@ -81,7 +81,7 @@ export default function OrderDetails() {
         <span>Back to Track Order</span>
       </Link>
 
-      <div className="max-w-md mx-auto bg-gray-900 p-8 rounded-lg shadow-lg">
+      <div className="max-w-md mx-auto bg-black p-8 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold mb-6 text-center">Order Status</h1>
 
         <div className="mb-6">
@@ -98,11 +98,10 @@ export default function OrderDetails() {
           <div className="flex items-center justify-between">
             <span className="text-gray-400">Status:</span>
             <span
-              className={`font-medium flex items-center ${
-                order.status === 'completed'
+              className={`font-medium flex items-center ${order.status === 'completed'
                   ? 'text-green-500'
                   : 'text-yellow-500'
-              }`}
+                }`}
             >
               {order.status === 'completed' ? (
                 <>

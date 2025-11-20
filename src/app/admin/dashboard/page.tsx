@@ -24,6 +24,7 @@ const AdminDashboardPage: React.FC = () => {
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -41,6 +42,17 @@ const AdminDashboardPage: React.FC = () => {
   // Delete confirmation modal state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchTerm]);
 
   // Load orders from Supabase
   useEffect(() => {
@@ -66,6 +78,11 @@ const AdminDashboardPage: React.FC = () => {
       if (statusFilter) {
         countQuery = countQuery.eq('status', statusFilter);
       }
+      if (debouncedSearchTerm) {
+        countQuery = countQuery.or(
+          `code.ilike.%${debouncedSearchTerm}%,name.ilike.%${debouncedSearchTerm}%,email.ilike.%${debouncedSearchTerm}%`
+        );
+      }
       const { count, error: countError } = await countQuery;
       if (!countError && typeof count === 'number') {
         setTotalRows(count);
@@ -84,6 +101,11 @@ const AdminDashboardPage: React.FC = () => {
         );
       if (statusFilter) {
         query = query.eq('status', statusFilter);
+      }
+      if (debouncedSearchTerm) {
+        query = query.or(
+          `code.ilike.%${debouncedSearchTerm}%,name.ilike.%${debouncedSearchTerm}%,email.ilike.%${debouncedSearchTerm}%`
+        );
       }
       const { data: ordersData, error: ordersError } = await query;
 
@@ -109,7 +131,7 @@ const AdminDashboardPage: React.FC = () => {
           (order) =>
             order.isRedeemed &&
             new Date(order.created).getTime() >
-              Date.now() - 7 * 24 * 60 * 60 * 1000 // Within last 7 days
+            Date.now() - 7 * 24 * 60 * 60 * 1000 // Within last 7 days
         );
 
         // Convert redeemed orders to notifications
@@ -130,7 +152,14 @@ const AdminDashboardPage: React.FC = () => {
     };
 
     checkSessionAndLoadData();
-  }, [router, refreshTrigger, statusFilter, currentPage, itemsPerPage]);
+  }, [
+    router,
+    refreshTrigger,
+    statusFilter,
+    currentPage,
+    itemsPerPage,
+    debouncedSearchTerm,
+  ]);
 
   // Pagination logic (now using totalRows from Supabase count)
   const totalPages = Math.ceil(totalRows / itemsPerPage);
@@ -246,7 +275,7 @@ const AdminDashboardPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-black text-white p-6">
       {/* Delete Confirmation Modal */}
       <Modal
         isOpen={isDeleteModalOpen}
@@ -310,7 +339,10 @@ const AdminDashboardPage: React.FC = () => {
             type="text"
             placeholder="Search by code, name, or email..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full bg-gray-800 border border-gray-700 rounded p-3 pl-10 text-white"
           />
           <Search
@@ -342,9 +374,8 @@ const AdminDashboardPage: React.FC = () => {
             className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-colors"
           >
             {statusFilter
-              ? `Status: ${
-                  statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)
-                }`
+              ? `Status: ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)
+              }`
               : 'Filter by Status'}
           </button>
           {isStatusDropdownOpen && (
@@ -358,11 +389,10 @@ const AdminDashboardPage: React.FC = () => {
                       setIsStatusDropdownOpen(false);
                       setCurrentPage(1);
                     }}
-                    className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${
-                      statusFilter === status
-                        ? 'bg-purple-700 text-white'
-                        : 'text-gray-200'
-                    }`}
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${statusFilter === status
+                      ? 'bg-purple-700 text-white'
+                      : 'text-gray-200'
+                      }`}
                   >
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </button>
@@ -401,6 +431,7 @@ const AdminDashboardPage: React.FC = () => {
       <CodeGeneratorModal
         isOpen={isCodeModalOpen}
         onClose={() => setIsCodeModalOpen(false)}
+        onCodeSaved={() => setRefreshTrigger((prev) => prev + 1)}
       />
 
       <div className="overflow-x-auto bg-gray-800 rounded-lg shadow mb-6">
@@ -422,9 +453,8 @@ const AdminDashboardPage: React.FC = () => {
             {currentItems.map((order: Order) => (
               <tr
                 key={order.id}
-                className={`border-t border-gray-700 hover:bg-gray-750 ${
-                  order.isRedeemed ? 'bg-green-900/20' : ''
-                }`}
+                className={`border-t border-gray-700 hover:bg-gray-750 ${order.isRedeemed ? 'bg-green-900/20' : ''
+                  }`}
               >
                 <td className="p-3">
                   <input
@@ -443,15 +473,14 @@ const AdminDashboardPage: React.FC = () => {
                 </td>
                 <td className="p-3">
                   <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      order.status === 'cancelled'
-                        ? 'bg-red-500/20 text-red-400'
-                        : order.isRedeemed
+                    className={`px-2 py-1 rounded-full text-xs ${order.status === 'cancelled'
+                      ? 'bg-red-500/20 text-red-400'
+                      : order.isRedeemed
                         ? 'bg-green-500/20 text-green-400'
                         : order.status === 'completed'
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : 'bg-yellow-500/20 text-yellow-400'
-                    }`}
+                          ? 'bg-blue-500/20 text-blue-400'
+                          : 'bg-yellow-500/20 text-yellow-400'
+                      }`}
                   >
                     {order.status}
                   </span>
@@ -524,9 +553,8 @@ const AdminDashboardPage: React.FC = () => {
               <button
                 key={pageNum}
                 onClick={() => setCurrentPage(pageNum)}
-                className={`px-3 py-1 border-r border-gray-700 ${
-                  currentPage === pageNum ? 'bg-blue-600' : 'bg-gray-800'
-                }`}
+                className={`px-3 py-1 border-r border-gray-700 ${currentPage === pageNum ? 'bg-blue-600' : 'bg-gray-800'
+                  }`}
               >
                 {pageNum}
               </button>

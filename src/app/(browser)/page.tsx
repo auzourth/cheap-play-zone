@@ -32,8 +32,8 @@ const RedeemCodeModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-xl">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-xl">
         <div className="flex justify-between items-center p-6 border-b border-gray-700">
           <h2 className="text-xl font-bold">Lookup Redemption Code</h2>
           <button
@@ -80,7 +80,7 @@ const Page = () => {
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false);
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen">
+    <div className="bg-black text-white min-h-screen">
       {/* Redeem Code Modal */}
       <RedeemCodeModal
         isOpen={isRedeemModalOpen}
@@ -284,7 +284,7 @@ const Page = () => {
       </section> */}
 
       {/* FAQ */}
-      <section className="py-16 bg-gray-900">
+      <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold">Frequently Asked Questions</h2>
@@ -333,7 +333,7 @@ const Page = () => {
       </section>
 
       {/* Call to Action */}
-      {/* <section className="py-16 bg-gray-800">
+      {/* <section className="py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8">READY TO TRY IT YOURSELF?</h2>
 
