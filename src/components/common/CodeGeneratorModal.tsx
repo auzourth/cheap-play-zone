@@ -28,7 +28,7 @@ const CodeGeneratorModal: React.FC<CodeGeneratorModalProps> = ({
   const [quantity, setQuantity] = useState(1);
   const [generatedCodes, setGeneratedCodes] = useState<GeneratedCode[]>([]);
   const [isCopied, setIsCopied] = useState<boolean>(false);
-  const [savedCodes, setSavedCodes] = useState<{ [code: string]: boolean }>({});
+  const [, setSavedCodes] = useState<{ [code: string]: boolean }>({});
 
   const generateCode = () => {
     if (!name || quantity < 1) return;
